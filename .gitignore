@@ -1,0 +1,5 @@
+data/raw/
+*.sav
+.ipynb_checkpoints/
+.env*
+.DS_Store
