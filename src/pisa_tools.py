@@ -14,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -94,3 +95,40 @@ def fit_pv(df, rhs, domain="MATH", weight=WEIGHT):
     table = pd.DataFrame(rows)
     point = table.drop(columns=["pv", "n"]).mean()
     return table, point
+
+
+def brr_se(df, formula, weight=WEIGHT, replicates=REPLICATE_WEIGHTS, fay=FAY):
+    """Sampling standard errors from the 80 replicate weights.
+
+    Refits `formula` once with the full-sample weight and once per
+    replicate weight, then applies the Fay correction:
+
+        Var = sum((theta_r - theta)^2) / (G * (1 - fay)^2)
+
+    Returns (theta, se, n). The design matrix is built once and reused,
+    which is what makes 81 fits take seconds rather than minutes.
+    """
+    need = _formula_columns(formula, df) + [weight] + list(replicates)
+    d = df.dropna(subset=need)
+
+    m0 = smf.wls(formula, data=d, weights=d[weight]).fit()
+    y, X, names = m0.model.endog, m0.model.exog, m0.model.exog_names
+    theta = pd.Series(m0.params, index=names)
+
+    reps = pd.DataFrame(
+        [sm.WLS(y, X, weights=d[w].to_numpy()).fit().params for w in replicates],
+        columns=names,
+    )
+    var = ((reps - theta) ** 2).sum() / (len(replicates) * (1 - fay) ** 2)
+    return theta, np.sqrt(var), len(d)
+
+
+def imputation_se(table, m=10):
+    """Rubin's second term from a fit_pv() table: sqrt((1 + 1/m) * Var_between)."""
+    between = table.drop(columns=["pv", "n"]).var(ddof=1)
+    return np.sqrt((1 + 1 / m) * between)
+
+
+def total_se(sampling_se, imputation_se):
+    """Variances add, standard errors do not."""
+    return np.sqrt(sampling_se ** 2 + imputation_se ** 2)

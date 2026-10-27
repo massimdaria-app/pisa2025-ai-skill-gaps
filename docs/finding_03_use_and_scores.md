@@ -124,3 +124,48 @@ yields no estimate of imputation variance at all, so an interval built
 on it omits a component of uncertainty entirely and is narrower than it
 should be. The sampling component, which BRR estimates from the 80
 replicate weights, is still to be added; the two are then summed.
+
+## Standard errors — BRR on PV1 (27 Oct 2026)
+
+Sampling variance from the 80 replicate weights with a Fay factor of
+0.5, combined with the imputation term from the appendix above.
+Estimation sample 123,554.
+
+| Coefficient | Estimate | SE sampling | SE imputation | SE total | t     | 95% CI           |
+|-------------|----------|-------------|---------------|----------|-------|------------------|
+| Learn       |   8.023  | 0.406       | 0.132         | 0.427    |  18.8 | [ 7.19,  8.86]   |
+| Draft       | -10.043  | 0.449       | 0.119         | 0.464    | -21.6 | [-10.95, -9.13]  |
+| ESCS        |  28.894  | 0.723       | 0.073         | 0.727    |  39.7 | [27.47, 30.32]   |
+
+Variances add; standard errors do not.
+
+## Design effects
+
+| Coefficient | Naive SE | BRR SE | Design effect |
+|-------------|----------|--------|---------------|
+| Learn       | 0.196    | 0.406  |  4.30         |
+| Draft       | 0.198    | 0.449  |  5.12         |
+| ESCS        | 0.213    | 0.723  | 11.53         |
+
+The naive standard errors understate variance by a factor of four to
+eleven, i.e. intervals by two to three and a half. The design effect is
+largest for ESCS because socio-economic status varies mainly *between*
+schools - schools are socially segregated - while the frequency of AI
+use also varies within them.
+
+With n = 123,554 statistical significance is cheap and is not itself a
+result. What carries content is the magnitude and the shape of the
+association, and the fact that the two modes of use point in opposite
+directions.
+
+## Outstanding on the standard errors
+
+- Sampling variance is computed on PV1 only. The complete procedure
+  averages the BRR variance across all ten plausible values; expected to
+  change little, but it is what will be reported.
+- The categorical specification has no standard errors yet.
+- Not verified against an independent implementation. R's intsvy on one
+  country is the check; until it agrees to three decimals these numbers
+  are provisional.
+
+Source: outputs/brr_se_math_pv1.csv
