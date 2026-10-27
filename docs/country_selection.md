@@ -13,7 +13,7 @@ Final sample: ARE, ESP, AUS, BRA, KAZ, GBR
 
 Rationale: six world regions (Gulf, Southern Europe, Oceania,
 Latin America, Central Asia, North-Western Europe); all six have
-ST438 coverage above 0.80 and ESCS above 0.90.
+ST438 coverage of at least 0.80 (BRA exactly 0.80) and ESCS above 0.90.
 
 Main specification uses ST438 (how AI is used) and ESCS.
 IC170 (school vs home use) is available only in ARE, ESP and AUS,
