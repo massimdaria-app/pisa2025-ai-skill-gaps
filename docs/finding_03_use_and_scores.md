@@ -103,3 +103,24 @@ The linear specification is retained as a robustness check.
 2. BRR standard errors; then a coefficient plot with intervals.
 3. Cross-check one country against R's intsvy.
 4. School fixed effects as robustness.
+
+## Appendix — one plausible value versus ten
+
+| Coefficient | PV1    | Ten PV  | Difference | SD across PV | Imputation SE |
+|-------------|--------|---------|------------|--------------|---------------|
+| Learn       |   8.14 |   8.022 | +0.118     | 0.126        | 0.132         |
+| Draft       | -10.05 | -10.043 | -0.007     | 0.113        | 0.118         |
+| ESCS        |  28.84 |  28.892 | -0.052     | 0.068        | 0.072         |
+
+The last column is the imputation component of the standard error,
+sqrt((1 + 1/10) * Var_between), i.e. the second term of Rubin's rule.
+
+Point estimates from a single plausible value are off by at most 0.12
+points, which is negligible against a coefficient of 8. A single PV is
+therefore acceptable for exploratory work.
+
+The reason ten are required is the second term. One plausible value
+yields no estimate of imputation variance at all, so an interval built
+on it omits a component of uncertainty entirely and is narrower than it
+should be. The sampling component, which BRR estimates from the 80
+replicate weights, is still to be added; the two are then summed.
