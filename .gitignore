@@ -4,3 +4,4 @@ data/raw/
 .env*
 .DS_Store
 data/processed/
+__pycache__/
