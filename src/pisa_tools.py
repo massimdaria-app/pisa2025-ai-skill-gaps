@@ -132,3 +132,51 @@ def imputation_se(table, m=10):
 def total_se(sampling_se, imputation_se):
     """Variances add, standard errors do not."""
     return np.sqrt(sampling_se ** 2 + imputation_se ** 2)
+
+
+def brr_pv(df, rhs, domain="MATH", m=10, weight=WEIGHT,
+           replicates=REPLICATE_WEIGHTS, fay=FAY):
+    """The full OECD procedure: BRR within each plausible value, then Rubin.
+
+        V = mean(U_p) + (1 + 1/m) * Var(theta_p)
+
+    where U_p is the BRR sampling variance computed on plausible value p and
+    theta_p its point estimate. Returns a table with the estimate, the total
+    standard error and its two components.
+
+    Verified against R's intsvy on GBR, 29 Oct 2026, agreeing to two decimal
+    places on every coefficient and every standard error. See
+    docs/check_r_intsvy.md.
+    """
+    thetas, within = [], []
+
+    for v in pv_names(domain)[:m]:
+        formula = f"{v} ~ {rhs}"
+        need = _formula_columns(formula, df) + [weight] + list(replicates)
+        d = df.dropna(subset=need)
+
+        m0 = smf.wls(formula, data=d, weights=d[weight]).fit()
+        y, X, names = m0.model.endog, m0.model.exog, m0.model.exog_names
+        theta = pd.Series(m0.params, index=names)
+
+        reps = pd.DataFrame(
+            [sm.WLS(y, X, weights=d[w].to_numpy()).fit().params
+             for w in replicates],
+            columns=names,
+        )
+
+        thetas.append(theta)
+        within.append(((reps - theta) ** 2).sum()
+                      / (len(replicates) * (1 - fay) ** 2))
+
+    thetas = pd.DataFrame(thetas)
+    point = thetas.mean()
+    U = pd.DataFrame(within).mean()
+    B = thetas.var(ddof=1)
+
+    return pd.DataFrame({
+        "estimate": point,
+        "se": np.sqrt(U + (1 + 1 / m) * B),
+        "se_sampling": np.sqrt(U),
+        "se_imputation": np.sqrt((1 + 1 / m) * B),
+    })

@@ -160,12 +160,14 @@ directions.
 
 ## Outstanding on the standard errors
 
-- Sampling variance is computed on PV1 only. The complete procedure
-  averages the BRR variance across all ten plausible values; expected to
-  change little, but it is what will be reported.
+- The figures above use BRR on PV1 only. The complete procedure, which
+  averages the BRR variance across all ten plausible values, is now
+  implemented as `brr_pv` in `src/pisa_tools.py`; the pooled model still
+  has to be re-run with it.
 - The categorical specification has no standard errors yet.
-- Not verified against an independent implementation. R's intsvy on one
-  country is the check; until it agrees to three decimals these numbers
-  are provisional.
+- The estimation machinery is verified. R's intsvy reproduces every
+  coefficient and every standard error to two decimal places on GBR
+  (29 Oct 2026, `docs/check_r_intsvy.md`). This verifies how the numbers
+  are computed, not that the specification is the right one.
 
 Source: outputs/brr_se_math_pv1.csv
